@@ -11,17 +11,17 @@ using System.Xml;
 
 namespace Atomus.Service
 {
-    public class WcfServiceClient : IServiceExtensions//, IServiceAsync
+    public class WcfServiceClient : IService//, IServiceAsync
     {
         //private IService Service;
         //private IServiceAsync ServiceAsync;
         private int tryConnectCount;
-        private readonly List<ServiceExtensionsInfo> listServicePool;
-        private readonly int servicePoolMaxCount;
+        private List<ServiceInfo> listServicePool;
+        private int servicePoolMaxCount;
 
         public WcfServiceClient()
         {
-            this.listServicePool = new List<ServiceExtensionsInfo>();
+            this.listServicePool = new List<ServiceInfo>();
             this.tryConnectCount = 0;
             //this.CreateService();
 
@@ -82,7 +82,7 @@ namespace Atomus.Service
             Binding binding;
             Uri uri;
             ServiceEndpoint serviceEndpoint;
-            ChannelFactory<IServiceExtensions> channelFactory;
+            ChannelFactory<IService> channelFactory;
             //ChannelFactory<IServiceAsync> _ChannelFactoryAsync;
 
             try
@@ -92,7 +92,7 @@ namespace Atomus.Service
                     //this.LoadBinding();
 
                     //this.LoadBinding(this.GetttributeInnerXml("system.serviceModel", 0));
-
+                    //this.LoadBinding(Factory.FactoryConfig.XmlDocument.SelectNodes(this.GetType().FullName.Replace(".", "/") + "/system.serviceModel").Item(0).InnerXml);
                 }
 
                 switch (bindingName)
@@ -190,11 +190,11 @@ namespace Atomus.Service
                 uri = new Uri(address);
 
                 serviceEndpoint = new ServiceEndpoint(ContractDescription.GetContract(this.GetType()), binding, new EndpointAddress(uri));
-                channelFactory = new ChannelFactory<IServiceExtensions>(serviceEndpoint);
+                channelFactory = new ChannelFactory<IService>(serviceEndpoint);
 
-                this.listServicePool.Add(new ServiceExtensionsInfo()
+                this.listServicePool.Add(new ServiceInfo()
                 {
-                    ServiceExtensions = channelFactory.CreateChannel(),
+                    Service = channelFactory.CreateChannel(),
                     IsBusy = false
                 });
 
@@ -319,7 +319,7 @@ namespace Atomus.Service
         //}
         //private Binding GetWSHttpBinding(string bindingConfigName)
         //{
-        //    return SetWSHttpBinding(new WSHttpBinding());
+        //    return SetWSHttpBinding(new WSHttpBinding(bindingConfigName));
         //}
         //private Binding SetWSHttpBinding(WSHttpBinding binding)
         //{
@@ -328,12 +328,11 @@ namespace Atomus.Service
         //    return binding;
         //}
 
-
         private bool LoadBizProxy1(string bindingName, string bindingConfigName, string address)
         {
             Uri uri;
             ServiceEndpoint serviceEndpoint;
-            ChannelFactory<IServiceExtensions> channelFactory;
+            ChannelFactory<IService> channelFactory;
 
             EndpointAddress Endpoint = new EndpointAddress(address);
             BasicHttpBinding binding = CreateBasicHttpBinding();
@@ -341,17 +340,16 @@ namespace Atomus.Service
             uri = new Uri(address);
 
             serviceEndpoint = new ServiceEndpoint(ContractDescription.GetContract(this.GetType()), binding, new EndpointAddress(uri));
-            channelFactory = new ChannelFactory<IServiceExtensions>(serviceEndpoint);
+            channelFactory = new ChannelFactory<IService>(serviceEndpoint);
 
-            this.listServicePool.Add(new ServiceExtensionsInfo()
+            this.listServicePool.Add(new ServiceInfo()
             {
-                ServiceExtensions = channelFactory.CreateChannel(),
+                Service = channelFactory.CreateChannel(),
                 IsBusy = false
             });
 
             return true;
         }
-
 
         static BasicHttpBinding CreateBasicHttpBinding()
         {
@@ -370,12 +368,10 @@ namespace Atomus.Service
         }
 
 
-
-
-        ServiceResult IServiceExtensions.Request(ServiceData serviceData)
+        Response IService.Request(ServiceDataSet serviceDataSet)
         {
-            ServiceResult response;
-            ServiceExtensionsInfo serviceInfo;
+            IResponse response;
+            ServiceInfo serviceInfo;
 
             serviceInfo = null;
 
@@ -383,11 +379,11 @@ namespace Atomus.Service
             {
                 serviceInfo = this.GetService();
                 serviceInfo.IsBusy = true;
-                response = serviceInfo.ServiceExtensions.Request(serviceData);
+                response = serviceInfo.Service.Request(serviceDataSet);
 
                 this.tryConnectCount = 0;//정상적으로 처리가 되면 재시도 횟수 초기화
 
-                return response;
+                return (Response)response;
             }
             catch (CommunicationException _Exception)
             {
@@ -398,26 +394,28 @@ namespace Atomus.Service
 
                 this.RemoveService(serviceInfo);
 
-                return ((IServiceExtensions)this).Request(serviceData);
+                return ((IService)this).Request(serviceDataSet);
             }
 
             catch (AtomusException _Exception)
             {
-                return (ServiceResult)Factory.CreateInstance("Atomus.Service.ServiceResult", false, true, _Exception);
+                return (Response)Factory.CreateInstance("Atomus.Service.Response", false, true, _Exception);
             }
             catch (Exception _Exception)
             {
-                return (ServiceResult)Factory.CreateInstance("Atomus.Service.ServiceResult", false, true, _Exception);
+                return (Response)Factory.CreateInstance("Atomus.Service.Response", false, true, _Exception);
             }
             finally
             {
                 serviceInfo?.End();
             }
+
+            //return (Response)_Response;
         }
 
-        public async Task<ServiceResult> RequestAsync(ServiceData serviceData)
+        public async Task<Response> RequestAsync(ServiceDataSet serviceDataSet)
         {
-            ServiceResult response;
+            IResponse response;
 
             Task pendingTask = Task.FromResult<bool>(true);
             var previousTask = pendingTask;
@@ -429,7 +427,7 @@ namespace Atomus.Service
                 try
                 {
                     await previousTask;
-                    response = ((IServiceExtensions)this).Request(serviceData);
+                    response = ((IService)this).Request(serviceDataSet);
                 }
                 finally
                 {
@@ -438,7 +436,7 @@ namespace Atomus.Service
                                     );
             await pendingTask;
 
-            return response;
+            return (Response)response;
         }
 
 
@@ -448,7 +446,7 @@ namespace Atomus.Service
         /// 사용 가능한 서비스가 없으면 신규로 생성해서 가져 온다
         /// </summary>
         /// <returns></returns>
-        private ServiceExtensionsInfo GetService()
+        private ServiceInfo GetService()
         {
             var service = from Tmp in this.listServicePool
                           where Tmp.IsBusy.Equals(false)
@@ -478,7 +476,7 @@ namespace Atomus.Service
         /// 서비스 Pool에서 해당 서비스 제거
         /// </summary>
         /// <param name="serviceInfo"></param>
-        private void RemoveService(ServiceExtensionsInfo serviceInfo)
+        private void RemoveService(ServiceInfo serviceInfo)
         {
             this.listServicePool.RemoveAll(x => x.Equals(serviceInfo));
         }
