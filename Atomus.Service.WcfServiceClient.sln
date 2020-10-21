@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30320.27
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{544F3974-02E6-49CD-8D0C-B013BA5A3974}"
+	ProjectSection(SolutionItems) = preProject
+		src\ServiceInfo.cs = src\ServiceInfo.cs
+		src\WcfServiceClient.cs = src\WcfServiceClient.cs
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atomus.Service.WcfServiceClient(dotNet)", "dotNet\Atomus.Service.WcfServiceClient(dotNet).csproj", "{73A3DBCF-AFB2-4ED5-A763-1F32600B1EEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atomus.Service.WcfServiceClient(dotNetCore)", "dotNetCore\Atomus.Service.WcfServiceClient(dotNetCore).csproj", "{28A4495E-F6DE-4011-9EFD-2D1C6A5B36E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Atomus.Service.WcfServiceClient(dotNetStandard)", "dotNetStandard\Atomus.Service.WcfServiceClient(dotNetStandard).csproj", "{0847E066-AB71-4D03-A22A-C61E48136FD0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{73A3DBCF-AFB2-4ED5-A763-1F32600B1EEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73A3DBCF-AFB2-4ED5-A763-1F32600B1EEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73A3DBCF-AFB2-4ED5-A763-1F32600B1EEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73A3DBCF-AFB2-4ED5-A763-1F32600B1EEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28A4495E-F6DE-4011-9EFD-2D1C6A5B36E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28A4495E-F6DE-4011-9EFD-2D1C6A5B36E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28A4495E-F6DE-4011-9EFD-2D1C6A5B36E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28A4495E-F6DE-4011-9EFD-2D1C6A5B36E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0847E066-AB71-4D03-A22A-C61E48136FD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0847E066-AB71-4D03-A22A-C61E48136FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0847E066-AB71-4D03-A22A-C61E48136FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0847E066-AB71-4D03-A22A-C61E48136FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {102D38ED-B829-4641-B2CC-ECA0D1038F05}
+	EndGlobalSection
+EndGlobal
